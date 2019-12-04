@@ -64,8 +64,7 @@ int cost(Vector policy,Data data){
 }
 
 // generate the initial solution based on LPT(longest processing time)
-Vector init_solution(Data data){
-    Vector policy = new_vector(data->n);
+void init_solution(Data data, Vector policy){
     for( int i=0; i < policy->size; i++){
         policy->get[i] = i;
     }
@@ -81,7 +80,6 @@ Vector init_solution(Data data){
             }
         }
     }
-    return policy;
 }
 
 

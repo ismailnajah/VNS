@@ -55,7 +55,7 @@ void free_data(Data data);
 Candidate VNS(Data data);
 Candidate local_search_VND(Candidate best, Data data);
 int cost(Vector policy,Data data);
-Vector init_solution(Data data);
+void init_solution(Data data, Vector policy);
 Candidate best_neighbor(Candidate best, Data data, void(*neighborhood)(Vector));
 
 //Neighborhoods structures

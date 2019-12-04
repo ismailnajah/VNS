@@ -1,9 +1,9 @@
 #include "Headers/Data.h"
  
-#define MAX_NO_IMPROV 500
-#define MAX_NO_IMPROV_LS 250
+#define MAX_NO_IMPROV 100   //500
+#define MAX_NO_IMPROV_LS 50 //250
 
-//number of neiborhoods structures
+//number of neighborhoods structures
 #define K_MAX 4
 
 //set of neighborhoods structurs
@@ -62,7 +62,7 @@ Candidate best_neighbor(Candidate best,Data data,void(*neighberhood)(Vector)){
     
     int count = 0;
     do{
-        //generate random solution from neiborhood
+        //generate random solution from neighborhood
         Candidate candidate = copy_candidate(best);
         neighberhood(candidate->policy);
         candidate->cost = cost(candidate->policy,data);
@@ -80,7 +80,7 @@ Candidate best_neighbor(Candidate best,Data data,void(*neighberhood)(Vector)){
 }
 
 Candidate local_search_VND(Candidate best,Data data){
-    //randomize the order of neiborhoods set to be used in VND
+    //randomize the order of neighborhoods set to be used in VND
     int *l = random_seq(K_MAX);
     int j=0;
 
@@ -105,7 +105,7 @@ Candidate local_search_VND(Candidate best,Data data){
 Candidate VNS(Data data){
     // initial solution based on LPT(Longest Processing Time)
     Candidate best = new_candidate(data->n);
-    best->policy = init_solution(data);
+    init_solution(data, best->policy);
     best->cost = cost(best->policy,data);
 
     //initialize the set of neighborhoods structurs
@@ -118,13 +118,13 @@ Candidate VNS(Data data){
     int iter1=0,iter2=0,iter3=0;
     int lem = (int)(MAX_NO_IMPROV/2);
 
-    //randomize the order of neiborhoods set
+    //randomize the order of neighborhoods set
     int *k=random_seq(K_MAX);
 
     //select the first neighborhood
     int i=0;
     do{
-        //generate random solution from neiborhood k[i] (shaking)
+        //generate random solution from neighborhood k[i] (shaking)
         Candidate candidate = copy_candidate(best);
         neighborhood[ k[i] ](candidate->policy);
         candidate->cost = cost(candidate->policy,data);
