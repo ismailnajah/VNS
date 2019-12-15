@@ -1,72 +1,94 @@
 #include "Headers/Data.h"
  
-#define MAX_NO_IMPROV 100   //500
-#define MAX_NO_IMPROV_LS 50 //250
+#define MAX_NO_IMPROV 50
+#define MAX_NO_IMPROV_LS 25
 
 //number of neighborhoods structures
 #define K_MAX 4
 
 //set of neighborhoods structurs
-void (*neighborhood[K_MAX])(Vector);
+void (*neighborhood[K_MAX])(Candidate,Data);
 
-void N_Swap(Vector policy){
-    int n = policy->size;
-    for(int k=0;k<10;k++){
-        int i=rand()%n;
+void N_Swap(Candidate candidate,Data data){
+    int n = candidate->policy->size;
+    Candidate temp = copy_candidate(candidate);
+    for(int i=0;i<n;i++){
         int j=rand()%n;
         while(i==j)
             j=rand()%n;
-        
-        swap(policy->get+i,policy->get+j);
+        swap(temp->policy->get+i,temp->policy->get+j);
+        temp->cost = cost(temp->policy,data);
+
+        if(temp->cost < candidate->cost){
+            copy_candidate_values(temp,candidate);
+            return;
+        }
     }
+    free_candidate(temp);
 }    
 
-void N_Reverse(Vector policy){
-    int n = (int)(policy->size/2);
-    int s = rand()%n;
-    int e = s+3+rand()%(policy->size-s-3);
-    for(int i=s+1,j=e-1;i<j;i++,j--){
-        swap(policy->get+i,policy->get+j);
+void N_Reverse(Candidate candidate,Data data){
+    int n = candidate->policy->size;
+
+    for(int i=0;i<n;i++){
+        Candidate temp = copy_candidate(candidate);
+        int j=i+rand()%(n-i);
+        for(int k=i,l=j;k<l;k++,l--){
+            swap(temp->policy->get+k,temp->policy->get+l);
+        }
+        temp->cost = cost(temp->policy,data);
+        if(temp->cost<candidate->cost){
+            copy_candidate_values(temp,candidate);
+            return;
+        }else{
+            free_candidate(temp);
+        }
     }
     
 }
 
-void N_Traspose(Vector policy){
-    int n = (int)(policy->size/2);
-    int s = rand()%n;
-    int k = rand()%10;
-    int j=0;
-    while(j<k){
-        swap(policy->get+s,policy->get+s+1);
-        s=(s+2)%policy->size;
-        j++;
-    }
-}
+void N_Transpose(Candidate candidate,Data data){
+    int n = candidate->policy->size;
+    Candidate temp = copy_candidate(candidate);
+    for(int i=0;i<n-1;i++){
+        swap(temp->policy->get+i,temp->policy->get+i+1);
+        temp->cost = cost(temp->policy,data);
 
-void N_Insert(Vector policy){
-    int n = (int)(policy->size/2);
-    int k = rand()%10;
-    int j = 0;
-    while(j<k){
-        int s = rand()%n;
-        int e = s+2+rand()%(policy->size-s-2);// vec->size-1
-        for(int i=s;i<e;i++){
-            swap(policy->get+i,policy->get+i+1);
+        if(temp->cost<candidate->cost){
+            copy_candidate_values(temp,candidate);
+            return;
+        }else{
+            swap(temp->policy->get+i,temp->policy->get+i+1);
         }
-        j++;
     }
-
+    free_candidate(temp);
 }
 
-Candidate best_neighbor(Candidate best,Data data,void(*neighberhood)(Vector)){
+void N_Insert(Candidate candidate,Data data){
+    int n = candidate->policy->size;
+    for(int i=0;i<n;i++){
+        Candidate temp = copy_candidate(candidate);
+        int j=i+rand()%(n-i);
+        for(int k=i;k<j;k++){
+            swap(temp->policy->get+k,temp->policy->get+k+1);
+        }
+        temp->cost = cost(temp->policy,data);
+        if(temp->cost<candidate->cost){
+            copy_candidate_values(temp,candidate);
+            return;
+        }else{
+            free_candidate(temp);
+        }
+    }
+}
+
+Candidate best_neighbor(Candidate best,Data data,void(*neighberhood)(Candidate,Data)){
     
     int count = 0;
     do{
         //generate random solution from neighborhood
         Candidate candidate = copy_candidate(best);
-        neighberhood(candidate->policy);
-        candidate->cost = cost(candidate->policy,data);
-
+        neighberhood(candidate,data);
         if(candidate->cost < best->cost){
             count=0;
             free_candidate(best);
@@ -87,7 +109,6 @@ Candidate local_search_VND(Candidate best,Data data){
     while(j < K_MAX){
         Candidate candidate = copy_candidate(best);
         candidate = best_neighbor(candidate,data,neighborhood[ l[j] ]);
-
         if(candidate->cost < best->cost){
             free_candidate(best);
             best = candidate;
@@ -102,6 +123,7 @@ Candidate local_search_VND(Candidate best,Data data){
     return best;
 }
 
+
 Candidate VNS(Data data){
     // initial solution based on LPT(Longest Processing Time)
     Candidate best = new_candidate(data->n);
@@ -111,7 +133,7 @@ Candidate VNS(Data data){
     //initialize the set of neighborhoods structurs
     neighborhood[0] = N_Swap;
     neighborhood[1] = N_Reverse;
-    neighborhood[2] = N_Traspose;
+    neighborhood[2] = N_Transpose;
     neighborhood[3] = N_Insert;
 
     // stopping condition variables
@@ -126,8 +148,7 @@ Candidate VNS(Data data){
     do{
         //generate random solution from neighborhood k[i] (shaking)
         Candidate candidate = copy_candidate(best);
-        neighborhood[ k[i] ](candidate->policy);
-        candidate->cost = cost(candidate->policy,data);
+        neighborhood[ k[i] ](candidate,data);
         
         //VND
         candidate = local_search_VND(candidate,data);
@@ -149,8 +170,7 @@ Candidate VNS(Data data){
         //cycle through all neighborhoods
         i= (i+1)%K_MAX;
 
-    }while(iter2 < MAX_NO_IMPROV && iter1 < MAX_NO_IMPROV);
+    }while(iter2 < MAX_NO_IMPROV);
     free(k);
-    
     return best;
 }

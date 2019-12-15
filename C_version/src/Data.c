@@ -100,11 +100,13 @@ void free_vector(Vector vec){
 }
 
 void show_vector(Vector vec){
-    printf("{ ");
+    printf("[ ");
     for(int i=0;i<vec->size;i++){
         printf("%i ",vec->get[i]);
+        if(i!=vec->size-1)
+            printf(",");
     }
-    printf("} size : %i\n",vec->size);
+    printf("] size : %i\n",vec->size);
 }
 
 Vector copy_vector(Vector vec){
@@ -131,6 +133,13 @@ Candidate copy_candidate(Candidate src){
     c->cost = src->cost;
     c->policy = copy_vector(src->policy);
     return c;
+}
+
+void copy_candidate_values(Candidate src,Candidate dist){
+    free_vector(dist->policy);
+    dist->cost = src->cost;
+    dist->policy = copy_vector(src->policy);
+    free_candidate(src);
 }
 
 void show_candidate(Candidate candidate){

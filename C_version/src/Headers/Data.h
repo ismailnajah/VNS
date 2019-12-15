@@ -56,13 +56,14 @@ Candidate VNS(Data data);
 Candidate local_search_VND(Candidate best, Data data);
 int cost(Vector policy,Data data);
 void init_solution(Data data, Vector policy);
-Candidate best_neighbor(Candidate best, Data data, void(*neighborhood)(Vector));
+Candidate best_neighbor(Candidate best, Data data, void(*neighborhood)(Candidate,Data));
+
 
 //Neighborhoods structures
-void N_Swap(Vector policy);
-void N_Reverse(Vector policy);
-void N_Transpose(Vector policy);
-void N_Insert(Vector policy);
+void N_Swap(Candidate candidate,Data data);
+void N_Reverse(Candidate candidate,Data data);
+void N_Transpose(Candidate candidate,Data data);
+void N_Insert(Candidate candidate,Data data);
 
 
 
@@ -78,6 +79,8 @@ Candidate new_candidate(int size);
 Candidate copy_candidate(Candidate src);
 void free_candidate(Candidate candiate);
 void show_candidate(Candidate candidate);
+
+void copy_candidate_values(Candidate src,Candidate dist);
 
 //utility functions
 int index_of(Vector vec,int value);

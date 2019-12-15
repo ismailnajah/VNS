@@ -10,7 +10,6 @@ int main(){
     error_handler(file,"main");
     
     Data data = get_data(file);
-
     Candidate best = VNS(data);
     show_candidate(best);
     free_candidate(best);
